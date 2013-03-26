@@ -29,7 +29,7 @@ internal_cmd="GET_PASSWORD_NOW"
 
 ## all available option should be described below as
 ##   :a:b:c:d
-while getopts "sgd:u:k:" opt; do
+while getopts "sd:u:k:" opt; do
   case $opt in
     u) 
       USER_GIVEN=$OPTARG

@@ -1,0 +1,84 @@
+## ============================================================================
+## SCRIPT NAME : abre
+## PURPOSE     : save encrypted password to flat-file database
+## AUTHOR      : Ismael Angelo Casimpan Jr. (ismael.angelo@casimpan.com)
+## 
+## VERSION     : 
+## ============================================================================
+
+#!/bin/bash
+
+DEBUG_ACTIVE=
+
+## include library scripts
+. ../lib/common.sh.lib
+
+function usage
+{
+     echo "Usage: ./abre -u <user_given> [-d </path/to/pwd.db>] [-k <path/to/key_file_to_use>] [-s]"
+	 echo "where:"
+     echo "	  u - used to identify the <user_given> to use"
+	 echo "   d - optional. Defaults to abre/etc/pwd.db. To override, specify </path/to/pwd.db>"
+	 echo "   k - optional. Defaults to ~/.ssh/id_rsa. To override, specify </path/to/key_file_to_use>"
+	 echo "   s - Set password of <user_given>"
+     exit 1
+}
+
+## default is to get password
+internal_cmd="GET_PASSWORD_NOW"
+
+## all available option should be described below as
+##   :a:b:c:d
+while getopts "sgd:u:k:" opt; do
+  case $opt in
+    u) 
+      USER_GIVEN=$OPTARG
+      ;;
+    d) 
+      PWD_DB_FILE=$OPTARG
+      ;;
+    k) 
+      KEY_FILE=$OPTARG
+      ;;
+    s) ## set_password. No parameter needed
+     internal_cmd="SET_PASSWORD_NOW"
+     ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      break
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      break
+      ;;
+  esac
+done
+
+
+#### CODE STARTS EXECUTING HERE...after it parsed parameters above...
+if [ -z $USER_GIVEN ]; then
+    usage
+else
+    if [ "$internal_cmd" == "GET_PASSWORD_NOW" ]; then
+        get_password $USER_GIVEN
+    elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
+    ### START: SET_PASSWORD
+      if [ $(is_user_found $USER_GIVEN) -eq 1 ]; then
+        ## ask user
+        echo "User [$USER_GIVEN] already exist."
+        echo "Do you want to change password instead? Yes/no"
+        echo -n ">>> "
+        read ans_chpwd
+        ## if yes, delete entry in pwd.db
+        if [ "$ans_chpwd" == "Y" ]; then
+           sed -i /^$USER_GIVEN\ /d $PWD_DB_FILE
+           set_password $USER_GIVEN
+        else
+           echo "[$USER_GIVEN] password NOT changed."
+        fi
+    else
+        set_password $USER_GIVEN
+    fi
+    ### END: SET_PASSWORD
+   fi
+fi

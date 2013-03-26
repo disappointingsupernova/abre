@@ -1,0 +1,222 @@
+KEY_FILE="$HOME/.ssh/id_rsa"
+PWD_DB_FILE='../etc/pwd.db'
+user_not_found='__USER_NOT_FOUND__'
+validity_pwd_tag='___KF_SIG'
+bad_pwd_tag='ERR_CORRUPT_PWD_FILE'
+
+#########################################################
+## FUNCTION : is_user_found
+## PURPOSE  : check if a user is found in database
+## PARAMS   : $1 - user
+## OUTPUT   : 0 - NOT FOUND
+##            1 - FOUND
+##
+## STATUS: tested per 'tests/TEST_is_user_found.sh'
+#########################################################
+function is_user_found
+{
+    local USER=$1
+    local retval=0
+
+    [ -e $PWD_DB_FILE ] && user_found=`awk "/$USER/ {print \\$1}" $PWD_DB_FILE`
+    [ "$user_found" == "$USER" ] && retval=1
+
+    echo $retval
+}
+## END: is_user_found()
+
+#########################################################
+## FUNCTION : get_cipher_text
+## PURPOSE  : get the encrypted password of user
+## PARAMS   : $1 - username
+## OUTPUT   : echo of $cipher_text
+##
+## STATUS: NOT TESTED YET
+#########################################################
+function get_cipher_text
+{
+    local USER=$1
+
+    [ $DEBUG_ACTIVE ] && echo "debug: get_encrypted_value() param: |$USER|"
+    cipher_text=`awk "/$USER/ {print \\$2}" $PWD_DB_FILE`
+
+	echo $cipher_text
+}
+## END: get_cipher_text()
+
+#########################################################
+## FUNCTION : get_password
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## TODO     : add __KF_SIG checking for password db integrity
+## STATUS   : NOT TESTED YET
+#########################################################
+function get_password
+{
+    local USER=$1
+    [ $DEBUG_ACTIVE ] && echo "debug: get_password() - param: |$USER|"
+
+	#TODO: add __KF_SIG checking for password db integrity
+	
+    ## if account not found, return $user_not_found
+    if [ $(is_user_found $USER) -eq 0 ]; then
+        echo $user_not_found
+    else
+        #get_encrypted_value $USER
+        #echo $cipher_text|base64 -d|openssl des3 -d -k $KEY_FILE
+		echo `get_cipher_text $USER`|base64 -d|openssl des3 -d -k $KEY_FILE
+    fi
+    
+}
+## END: get_password()
+
+## get key file signature
+#########################################################
+## FUNCTION : get_KF_SIG
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
+function get_KF_SIG
+{
+  ## TODO: ensure that KEY_FILE already exist
+  local cipher_text=$(get_cipher_text $validity_pwd_tag)
+  [ "$cipher_text" == "" ] && cipher_text=$bad_pwd_tag
+
+  echo $cipher_text  
+}
+## END: get_KF_SIG()
+
+#########################################################
+## FUNCTION : set_password_actual
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
+## no-verification. Just set password
+function set_password_actual
+{
+          local USER_TO_CHECK=$1
+
+          echo -n "Password: "
+          read -s PWD_entered
+          echo
+          echo -n "Re-input Password: "
+          read -s PWD_entered2
+          echo
+          [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered"
+          [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered2"
+
+          if [ "$PWD_entered" == "$PWD_entered2" ]; then
+              generated_pwd=$(echo "$PWD_entered"|openssl des3 -k $KEY_FILE|base64)
+              echo "$USER_TO_CHECK $generated_pwd" >> $PWD_DB_FILE
+          else
+              echo 'ERROR: Passwords does not match!'
+              exit 1
+          fi
+}
+## END: set_password_actual()
+
+#########################################################
+## FUNCTION : set_password_actual_chksig
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
+function set_password_actual_chksig
+{
+      local USER_TO_CHECK=$1
+      local kfsig_val=$(get_KF_SIG)
+
+      ## $KEY_FILE is same as $__KF_SIG. User validated.
+      if [ "$kfsig_val" == "$(get_file_md5 $KEY_FILE)" ]; then
+          set_password_actual $USER_TO_CHECK
+      elif [ "$kfsig_val" == "$bad_pwd_tag" ]; then
+          echo "ERROR: Corrupted pwd database."
+      else
+          echo "ERROR: Unauthorized to save new account to pwd database"
+      fi
+}
+## END: set_password_actual_chksig()
+
+#########################################################
+## FUNCTION : set_password
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
+function set_password
+{
+   local USER_TO_CHECK=$1
+
+   ## $PWD_DB_FILE absent. Add __KF_SIG
+   if [ ! -e $PWD_DB_FILE ]; then
+       if [ -e $KEY_FILE ]; then
+          __kf_sig_val=$(get_file_md5 $KEY_FILE)
+          echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
+          set_password_actual $USER_TO_CHECK
+       else
+          echo "TODO: $KEY_FILE not found. Abort"
+          exit 1
+       fi
+   ## $PWD_DB_FILE already exist. 
+   ## verify value of $validity_pwd_tag
+   else
+       set_password_actual_chksig $USER_TO_CHECK
+   fi
+}
+## END: set_password()
+
+#########################################################
+## FUNCTION : get_file_md5
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
+function get_file_md5
+{
+    local file_to_check=$1
+
+    md5_hash=`md5sum $file_to_check|cut -d' ' -f1`
+    echo $md5_hash
+}
+## END: get_file_md5()
+
+#########################################################
+## FUNCTION : auth_check_keyfile
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
+function auth_check_keyfile
+{
+    local db_validity
+    local key_validity
+
+    ## extract __KF_SIG
+    ## get md5 of $KEY_FILE
+    ## if does not match, declare: "Unauthorized user"
+	db_validity=$(get_cipher_text $validity_pwd_tag)
+
+    key_validity=$(get_file_md5 $KEY_FILE)
+    if [ "$db_validity" == "$key_validity" ]; then
+        echo "Yehey, valid user"
+    else
+        echo "Unauthorized user"
+    fi
+}
+## END: auth_check_keyfile()

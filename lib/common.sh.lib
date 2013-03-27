@@ -7,6 +7,7 @@ bad_pwd_tag='ERR_CORRUPT_PWD_FILE'
 ## binaries list
 AWK_BIN=`which awk 2>/dev/null`
 BASE64_BIN=`which base64 2>/dev/null`
+CUT_BIN=`which cut 2>/dev/null`
 MD5SUM_BIN=`which md5sum 2>/dev/null`
 OPENSSL_BIN=`which openssl 2>/dev/null`
 SED_BIN=`which sed 2>/dev/null`
@@ -14,6 +15,7 @@ SED_BIN=`which sed 2>/dev/null`
 ## check binaries make sure it exist in machine
 if   test "-${AWK_BIN}-"      = "--" \
   || test "-${BASE64_BIN}-"   = "--" \
+  || test "-${CUT_BIN}-"      = "--" \
   || test "-${MD5SUM_BIN}-"   = "--" \
   || test "-${OPENSSL_BIN}-"  = "--" \
   || test "-${SED_BIN}-"      = "--"
@@ -129,10 +131,13 @@ function set_password_actual
           [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered"
           [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered2"
 
-          if [ "$PWD_entered" == "$PWD_entered2" ]; then
+          local crypt_passwd1=$(echo "$PWD_entered"|$MD5SUM_BIN -t|$CUT_BIN -d' ' -f1) 
+          local crypt_passwd2=$(echo "$PWD_entered2"|$MD5SUM_BIN -t|$CUT_BIN -d' ' -f1) 
+          #if [ "$PWD_entered" == "$PWD_entered2" ]; then
+          if [ "$crypt_passwd1" == "$crypt_passwd2" ]; then
               generated_pwd=$(echo "$PWD_entered"|$OPENSSL_BIN des3 -k "$KEY_FILE"|$BASE64_BIN)
               echo "$USER_TO_CHECK $generated_pwd" >> "$PWD_DB_FILE"
-			  echo "[SUCCESS] user(${USER_TO_CHECK}) information saved!"
+              echo "[SUCCESS] user(${USER_TO_CHECK}) information saved!"
           else
               echo 'ERROR: Passwords does not match!'
               exit 1

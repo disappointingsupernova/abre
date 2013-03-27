@@ -67,10 +67,7 @@ directory structure:
  etc - password and config files would be here
  tests - tests on functions would be here
 
-
-==============================
-** TODO (see also the issues section in github)
-==============================
- * duplicate user: delete only after new password ready to be written
- * db validation first before checking for duplicate user
- * refactor set_password()
+*TODO (see also the issues section in github)*
+  * duplicate user: delete only after new password ready to be written
+  * db validation first before checking for duplicate user
+  * refactor set_password()

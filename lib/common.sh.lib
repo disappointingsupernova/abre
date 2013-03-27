@@ -36,7 +36,7 @@ function is_user_found
     local USER=$1
     local retval=0
 
-	[ -e $PWD_DB_FILE ] && user_found=`$AWK_BIN "/$USER/ {print \\$1}" $PWD_DB_FILE`
+    [ -e $PWD_DB_FILE ] && user_found=`$AWK_BIN "/$USER/ {print \\$1}" "$PWD_DB_FILE"`
     [ "$user_found" == "$USER" ] && retval=1
 
     echo $retval
@@ -56,9 +56,9 @@ function get_cipher_text
     local USER=$1
 
     [ $DEBUG_ACTIVE ] && echo "debug: get_encrypted_value() param: |$USER|"
-    cipher_text=`$AWK_BIN "/$USER/ {print \\$2}" $PWD_DB_FILE`
+    cipher_text=`$AWK_BIN "/$USER/ {print \\$2}" "$PWD_DB_FILE"`
 
-	echo $cipher_text
+    echo $cipher_text
 }
 ## END: get_cipher_text()
 
@@ -82,7 +82,7 @@ function get_password
     if [ $(is_user_found $USER) -eq 0 ]; then
         echo $user_not_found
     else
-		echo `get_cipher_text $USER`|$BASE64_BIN -d|$OPENSSL_BIN des3 -d -k $KEY_FILE
+        echo `get_cipher_text $USER`|$BASE64_BIN -d|$OPENSSL_BIN des3 -d -k "$KEY_FILE"
     fi
     
 }
@@ -130,8 +130,8 @@ function set_password_actual
           [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered2"
 
           if [ "$PWD_entered" == "$PWD_entered2" ]; then
-              generated_pwd=$(echo "$PWD_entered"|$OPENSSL_BIN des3 -k $KEY_FILE|$BASE64_BIN)
-              echo "$USER_TO_CHECK $generated_pwd" >> $PWD_DB_FILE
+              generated_pwd=$(echo "$PWD_entered"|$OPENSSL_BIN des3 -k "$KEY_FILE"|$BASE64_BIN)
+              echo "$USER_TO_CHECK $generated_pwd" >> "$PWD_DB_FILE"
 			  echo "[SUCCESS] user(${USER_TO_CHECK}) information saved!"
           else
               echo 'ERROR: Passwords does not match!'
@@ -154,7 +154,7 @@ function set_password_actual_chksig
       local kfsig_val=$(get_KF_SIG)
 
       ## $KEY_FILE is same as $__KF_SIG. User validated.
-      if [ "$kfsig_val" == "$(get_file_md5 $KEY_FILE)" ]; then
+      if [ "$kfsig_val" == $(get_file_md5 "$KEY_FILE") ]; then
           set_password_actual $USER_TO_CHECK
       elif [ "$kfsig_val" == "$bad_pwd_tag" ]; then
           echo "ERROR: Corrupted pwd database."
@@ -178,8 +178,8 @@ function set_password
 
    ## $PWD_DB_FILE absent. Add __KF_SIG
    if [ ! -e $PWD_DB_FILE ]; then
-       if [ -e $KEY_FILE ]; then
-          __kf_sig_val=$(get_file_md5 $KEY_FILE)
+       if [ -e "$KEY_FILE" ]; then
+          __kf_sig_val=$(get_file_md5 "$KEY_FILE")
           echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
           set_password_actual $USER_TO_CHECK
        else
@@ -204,9 +204,9 @@ function set_password
 #########################################################
 function get_file_md5
 {
-    local file_to_check=$1
+    local file_to_check="$@"
 
-    md5_hash=`$MD5SUM_BIN $file_to_check|cut -d' ' -f1`
+    md5_hash=`$MD5SUM_BIN "$file_to_check"|cut -d' ' -f1`
     echo $md5_hash
 }
 ## END: get_file_md5()
@@ -229,7 +229,7 @@ function auth_check_keyfile
     ## if does not match, declare: "Unauthorized user"
 	db_validity=$(get_cipher_text $validity_pwd_tag)
 
-    key_validity=$(get_file_md5 $KEY_FILE)
+    key_validity=$(get_file_md5 "$KEY_FILE")
     if [ "$db_validity" == "$key_validity" ]; then
         echo "Yehey, valid user"
     else

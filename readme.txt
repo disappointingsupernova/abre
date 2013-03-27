@@ -3,8 +3,9 @@ OVERVIEW
 What is 'abre'
 
 A simple tool that uses readily available (open-source) tools to encrypt/decrypt passwords.
-I had this need to store my script's passwords into a single file (in a secure way) and searching
-for alternatives, I don't see one that's simple enough for me to use hence, I created my own.
+I had this need to store my script's passwords into a single file (in a secure way) and 
+searching for alternatives, I don't see one that's simple enough for me to use hence, I 
+created my own.
 
 
 How to Use 'abre'
@@ -40,15 +41,18 @@ How to use 'abre' in your scripts
 
 Why 'abre'?
 
-Abre is the Spanish word for 'open' and is the same word in my Philippine dialect in the Leyte-Samar Area
-called 'Waray'. When brainstorming for a word to use for this project, I remember my little sister always 
-watching 'Dora The Explorer' which always says "what's the magic word?...Abre". And so I used that word
-to help me remember (and hope that's easy for the users of this script as well).
+Abre is the Spanish word for 'open' and is the same word in my Philippine dialect in the
+Leyte-Samar Area called 'Waray'. When brainstorming for a word to use for this project, 
+I remember my little sister always watching 'Dora The Explorer' which always says 
+"what's the magic word?...Abre". And so I used that word to help me remember (and hope 
+that's easy for the users of this script as well).
  
 
 BUG/IMPROVEMENT REQUESTS:
 
-Send me an email (ismael.angelo@casimpan.com) or fork this project and send me a merge request
+Send me an email (ismael.angelo@casimpan.com) or fork this project and send me a merge 
+request
+
 -------------------------------------------------------
 
 GOALS OF ABRE:
@@ -65,7 +69,7 @@ directory structure:
 
 
 ==============================
-** TODO
+** TODO (see also the issues section in github)
 ==============================
  * duplicate user: delete only after new password ready to be written
  * db validation first before checking for duplicate user

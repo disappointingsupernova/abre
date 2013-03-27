@@ -71,7 +71,7 @@ else
         read ans_chpwd
         ## if yes, delete entry in pwd.db
         if [ "$ans_chpwd" == "Y" ]; then
-           sed -i /^$USER_GIVEN\ /d $PWD_DB_FILE
+           $SED_BIN -i /^$USER_GIVEN\ /d $PWD_DB_FILE
            set_password $USER_GIVEN
         else
            echo "[$USER_GIVEN] password NOT changed."

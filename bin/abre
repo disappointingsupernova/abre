@@ -16,11 +16,11 @@ DEBUG_ACTIVE=
 function usage
 {
      echo "Usage: ./abre -u <user_given> [-d </path/to/pwd.db>] [-k <path/to/key_file_to_use>] [-s]"
-	 echo "where:"
-     echo "	  u - used to identify the <user_given> to use"
-	 echo "   d - optional. Defaults to abre/etc/pwd.db. To override, specify </path/to/pwd.db>"
-	 echo "   k - optional. Defaults to ~/.ssh/id_rsa. To override, specify </path/to/key_file_to_use>"
-	 echo "   s - Set password of <user_given>"
+     echo "where:"
+     echo "   u - used to identify the <user_given> to use"
+     echo "   d - optional. Defaults to abre/etc/pwd.db. To override, specify </path/to/pwd.db>"
+     echo "   k - optional. Defaults to ~/.ssh/id_rsa. To override, specify </path/to/key_file_to_use>"
+     echo "   s - Set password of <user_given>"
      exit 1
 }
 
@@ -59,9 +59,9 @@ done
 if [ -z $USER_GIVEN ]; then
     usage
 else
-    if [ "$internal_cmd" == "GET_PASSWORD_NOW" ]; then
+    if [ "$internal_cmd" == "GET_PASSWORD_NOW" ] && [ -e $PWD_DB_FILE ]; then
         get_password $USER_GIVEN
-    elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
+    elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ] || [ ! -e $PWD_DB_FILE ] ; then
     ### START: SET_PASSWORD
       if [ $(is_user_found $USER_GIVEN) -eq 1 ]; then
         ## ask user
@@ -76,9 +76,9 @@ else
         else
            echo "[$USER_GIVEN] password NOT changed."
         fi
-    else
+      else
         set_password $USER_GIVEN
-    fi
+      fi
     ### END: SET_PASSWORD
    fi
 fi

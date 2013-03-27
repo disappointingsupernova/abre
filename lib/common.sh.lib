@@ -116,6 +116,7 @@ function set_password_actual
           if [ "$PWD_entered" == "$PWD_entered2" ]; then
               generated_pwd=$(echo "$PWD_entered"|openssl des3 -k $KEY_FILE|base64)
               echo "$USER_TO_CHECK $generated_pwd" >> $PWD_DB_FILE
+			  echo "[SUCCESS] user(${USER_TO_CHECK}) information saved!"
           else
               echo 'ERROR: Passwords does not match!'
               exit 1

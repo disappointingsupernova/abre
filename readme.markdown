@@ -1,3 +1,6 @@
+abre
+=======================================
+
 OVERVIEW
 
 What is 'abre'
@@ -48,7 +51,13 @@ I remember my little sister always watching 'Dora The Explorer' which always say
 that's easy for the users of this script as well).
  
 
-BUG/IMPROVEMENT REQUESTS:
+TESTED PLATFORMS
+
+Development of this script was made on Cygwin v1.7.15 and untested in other Unix-like 
+enviroment. I plan to have this tested on at least 1 Linux box (RHEL/CentOS perhaps)
+
+
+BUG/IMPROVEMENT REQUESTS
 
 Send me an email (ismael.angelo@casimpan.com) or fork this project and send me a merge 
 request

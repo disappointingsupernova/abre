@@ -65,11 +65,14 @@ request
 -------------------------------------------------------
 
 GOALS OF ABRE:
-  * generate password
-  * verify password integrity
-  * get the password
-  * simplicity
-  
+  * simplicity (only get/set(encrypted) password, perhaps later is list/delete accounts)
+  * encrypt password via any identity key (default is your ssh rsa private key)
+  * get the cleartext password if identity key allows
+
+WHAT IS NOT ABRE:
+  * Abre cannot generate password for you, it's simply a password store
+  * opposites of the goals above
+    
 directory structure:
  bin - where binaries would reside (e.g. abre)
  lib - libraries (e.g.) common.sh.lib

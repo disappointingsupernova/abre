@@ -257,30 +257,3 @@ function get_file_md5
     echo $md5_hash
 }
 ## END: get_file_md5()
-
-#########################################################
-## FUNCTION : auth_check_keyfile
-## PURPOSE  : 
-## PARAMS   : 
-## OUTPUT   :
-##
-## STATUS: NOT TESTED YET
-#########################################################
-function auth_check_keyfile
-{
-    local db_validity
-    local key_validity
-
-    ## extract __KF_SIG
-    ## get md5 of $KEY_FILE
-    ## if does not match, declare: "Unauthorized user"
-	db_validity=$(get_cipher_text $validity_pwd_tag)
-
-    key_validity=$(get_file_md5 "$KEY_FILE")
-    if [ "$db_validity" == "$key_validity" ]; then
-        echo "Yehey, valid user"
-    else
-        echo "Unauthorized user"
-    fi
-}
-## END: auth_check_keyfile()

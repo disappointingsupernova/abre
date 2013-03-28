@@ -191,40 +191,52 @@ function set_password
 {
    local USER_TO_CHECK=$1
    local __kf_sig_val=$(get_file_md5 "$KEY_FILE")
-   local kf_id=$(get_KF_SIG)
+   local kf_id=""
    
    ## $PWD_DB_FILE absent. Add __KF_SIG
    if [ ! -e $PWD_DB_FILE ]; then
        echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
-       set_password_actual $USER_TO_CHECK
-   ## $PWD_DB_FILE already exist. 
+   fi
+   
+   kf_id=$(get_KF_SIG)
+   if [ "$kfid" == "$bad_pwd_tag" ]; then
+       die "ERROR: Unreadable pwd database."
+   elif [ "$__kf_sig_val" != "$kf_id" ]; then
+       die "ERROR: Unauthorized to save new account to pwd database"
+   fi
+   
+   is_user_found $USER_TO_CHECK
+   local user_found=$?
+   if [ $user_found -eq 1 ]; then
+     ## ask user
+     echo "User [$USER_TO_CHECK] already exist."
+     echo "Do you want to change password instead? [Y]es/[n]o"
+     read -p ">>> " ans_chpwd
+     if [ "$ans_chpwd" != "Y" ]; then
+        die "[$USER_TO_CHECK] password NOT changed."
+	 fi
+   fi
+	  
+   ## $PWD_DB_FILE already exist.
    ## verify value of $validity_pwd_tag
-   else
-      ## $__kfsig_val is same as $kf_id, User validated.
-      if [ "$__kf_sig_val" == "$kf_id" ]; then
-          read -s -p "Password: " PWD_entered
-          echo
-          read -s -p "Re-input Password: " PWD_entered2
-          echo
-          [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered"
-          [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered2"
-
-          local crypt_passwd1=$(echo "$PWD_entered"|$MD5SUM_BIN -t|$CUT_BIN -d' ' -f1) 
-          local crypt_passwd2=$(echo "$PWD_entered2"|$MD5SUM_BIN -t|$CUT_BIN -d' ' -f1) 
-          #if [ "$PWD_entered" == "$PWD_entered2" ]; then
-          if [ "$crypt_passwd1" == "$crypt_passwd2" ]; then
-              generated_pwd=$(echo "$PWD_entered"|$OPENSSL_BIN des3 -k "$KEY_FILE"|$BASE64_BIN)
-              echo "$USER_TO_CHECK $generated_pwd" >> "$PWD_DB_FILE"
-              echo "[SUCCESS] user(${USER_TO_CHECK}) information saved!"
-          else
-              echo 'ERROR: Passwords does not match!'
-              exit 1
-          fi
-      elif [ "$kfid" == "$bad_pwd_tag" ]; then
-          echo "ERROR: Unreadable pwd database."
-      else
-          echo "ERROR: Unauthorized to save new account to pwd database"
-      fi
+   ## $__kfsig_val is same as $kf_id, User validated.
+   if [ "$__kf_sig_val" == "$kf_id" ]; then
+       read -s -p "Password: " PWD_entered
+       echo
+       read -s -p "Re-input Password: " PWD_entered2
+       echo
+       [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered"
+       [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered2"
+       local crypt_passwd1=$(echo "$PWD_entered"|$MD5SUM_BIN -t|$CUT_BIN -d' ' -f1) 
+       local crypt_passwd2=$(echo "$PWD_entered2"|$MD5SUM_BIN -t|$CUT_BIN -d' ' -f1) 
+       if [ "$crypt_passwd1" == "$crypt_passwd2" ]; then
+           generated_pwd=$(echo "$PWD_entered"|$OPENSSL_BIN des3 -k "$KEY_FILE"|$BASE64_BIN)
+		   [ "$ans_chpwd" == "Y" ] && $SED_BIN -i /^$USER_TO_CHECK\ /d $PWD_DB_FILE
+           echo "$USER_TO_CHECK $generated_pwd" >> "$PWD_DB_FILE"
+           echo "[SUCCESS] user(${USER_TO_CHECK}) information saved!"
+       else
+           die 'ERROR: Passwords does not match!'
+       fi
    fi
 }
 ## END: set_password()

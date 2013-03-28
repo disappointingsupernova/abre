@@ -45,7 +45,6 @@ while getopts "sd:u:k:" opt; do
   esac
 done
 
-
 #### CODE STARTS EXECUTING HERE...after it parsed parameters above...
 if [ -z $USER_GIVEN ]; then
     usage
@@ -59,26 +58,7 @@ else
     ## SET_PASSWORD_NOW must be explicitly chosen
     ## 
     elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
-    ### START: SET_PASSWORD
-      is_user_found $USER_GIVEN
-      _user_found=$?
-      if [ $_user_found -eq 1 ]; then
-        ## ask user
-        echo "User [$USER_GIVEN] already exist."
-        echo "Do you want to change password instead? [Y]es/[n]o"
-        read -p ">>> " ans_chpwd
-        ## if yes, delete entry in pwd.db
-        if [ "$ans_chpwd" == "Y" ]; then
-           $SED_BIN -i /^$USER_GIVEN\ /d $PWD_DB_FILE
-           set_password $USER_GIVEN
-        else
-           echo "[$USER_GIVEN] password NOT changed."
-        fi
-      else
-        set_password $USER_GIVEN
-      fi
-    ### END: SET_PASSWORD
-
+	    set_password $USER_GIVEN
    ##
    ## shout '__PWD_DB_FILE_MISSING__' 
    ##

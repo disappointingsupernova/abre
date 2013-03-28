@@ -13,16 +13,9 @@ DEBUG_ACTIVE=
 ## include library scripts
 . ../lib/common.sh.lib
 
-function usage
-{
-     echo "Usage: ./abre -u <user_given> [-d </path/to/pwd.db>] [-k <path/to/key_file_to_use>] [-s]"
-     echo "where:"
-     echo "   u - used to identify the <user_given> to use"
-     echo "   d - optional. Defaults to abre/etc/pwd.db. To override, specify </path/to/pwd.db>"
-     echo "   k - optional. Defaults to ~/.ssh/id_rsa. To override, specify </path/to/key_file_to_use>"
-     echo "   s - Set password of <user_given>. If not specified, gets password"
-     exit 1
-}
+## do pre-requisites for script
+check_needed_tools ## for needed binaries
+check_KF_exist     ## existence of $KEY_FILE
 
 ## default is to get password
 internal_cmd="GET_PASSWORD_NOW"
@@ -67,7 +60,6 @@ else
     ## 
     elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
     ### START: SET_PASSWORD
-       
       is_user_found $USER_GIVEN
       _user_found=$?
       if [ $_user_found -eq 1 ]; then

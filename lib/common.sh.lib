@@ -13,17 +13,78 @@ MD5SUM_BIN=`which md5sum 2>/dev/null`
 OPENSSL_BIN=`which openssl 2>/dev/null`
 SED_BIN=`which sed 2>/dev/null`
 
-## check binaries make sure it exist in machine
-if   test "-${AWK_BIN}-"      = "--" \
-  || test "-${BASE64_BIN}-"   = "--" \
-  || test "-${CUT_BIN}-"      = "--" \
-  || test "-${MD5SUM_BIN}-"   = "--" \
-  || test "-${OPENSSL_BIN}-"  = "--" \
-  || test "-${SED_BIN}-"      = "--"
-then
-  echo "[ALERT] It seems that some binaries are missing. Cannot run script"
-  exit 1
-fi
+#########################################################
+## FUNCTION : die
+## PURPOSE  : prints error and exit 1
+## PARAMS   : string to echo
+## OUTPUT   : exit 1
+##
+## STATUS   : no test needed
+#########################################################
+function die
+{
+    local str_to_echo=$@
+	
+	echo $@
+	exit 1
+}
+## END: die()
+
+#########################################################
+## FUNCTION : usage
+## PURPOSE  : show script usage
+## PARAMS   : N/A
+## OUTPUT   : exit 1
+##
+## STATUS   : no test needed
+#########################################################
+function usage
+{
+     echo "Usage: ./abre -u <user_given> [-d </path/to/pwd.db>] [-k <path/to/key_file_to_use>] [-s]"
+     echo "where:"
+     echo "   u - used to identify the <user_given> to use"
+     echo "   d - optional. Defaults to abre/etc/pwd.db. To override, specify </path/to/pwd.db>"
+     echo "   k - optional. Defaults to ~/.ssh/id_rsa. To override, specify </path/to/key_file_to_use>"
+     echo "   s - Set password of <user_given>. If not specified, gets password"
+}
+## END: usage()
+
+#########################################################
+## FUNCTION : check_needed_tools
+## PURPOSE  : to check needed binaries for this script
+## PARAMS   : N/A
+## OUTPUT   : exit 1 - when a binary/binaries missing
+##
+## STATUS   : no test needed
+#########################################################
+function check_needed_tools
+{
+    ## check binaries make sure it exist in machine
+    if   test "-${AWK_BIN}-"      = "--" \
+   	  || test "-${BASE64_BIN}-"   = "--" \
+      || test "-${CUT_BIN}-"      = "--" \
+      || test "-${MD5SUM_BIN}-"   = "--" \
+      || test "-${OPENSSL_BIN}-"  = "--" \
+      || test "-${SED_BIN}-"      = "--"
+    then
+	  die "[ERROR] It seems that some binaries are missing. Cannot run script"
+    fi
+}
+## END: check_needed_tools()
+
+#########################################################
+## FUNCTION : check_KF_exist
+## PURPOSE  : to check if $KEY_FILE exist
+## PARAMS   : N/A
+## OUTPUT   : exit 1 - when $KEY_FILE missing/not found
+##
+## STATUS   : no test needed
+#########################################################
+function check_KF_exist
+{
+    [ ! -e "$KEY_FILE" ] && die "[ERROR] \$KEY_FILE ($KEY_FILE) does not exist" 
+} 
+## END: check_KF_exist()
 
 #########################################################
 ## FUNCTION : is_user_found
@@ -42,7 +103,6 @@ function is_user_found
     [ -e "$PWD_DB_FILE" ] && user_found=`$AWK_BIN "/$USER\ / {print \\$1}" "$PWD_DB_FILE"`
     [ "$user_found" == "$USER" ] && retval=1
 
-    #echo $retval
     return $retval
 }
 ## END: is_user_found()
@@ -82,7 +142,7 @@ function get_password
  
     [ $DEBUG_ACTIVE ] && echo "debug: get_password() - param: |$USER|"
 
-    if [ -e "$KEY_FILE" ] && [ "$(get_KF_SIG)" == "$(get_file_md5 "$KEY_FILE")" ]; then
+    if [ "$(get_KF_SIG)" == "$(get_file_md5 "$KEY_FILE")" ]; then
         ## if account not found, return $user_not_found
         is_user_found $USER
         local found_user=$? 
@@ -112,7 +172,7 @@ function get_KF_SIG
 {
   local  cipher_text=""
 
-  [ -e "$KEY_FILE" ] && cipher_text=$(get_cipher_text $validity_pwd_tag)
+  cipher_text=$(get_cipher_text $validity_pwd_tag)
   [ "$cipher_text" == "" ] && cipher_text=$bad_pwd_tag
 
   echo $cipher_text  
@@ -135,13 +195,8 @@ function set_password
    
    ## $PWD_DB_FILE absent. Add __KF_SIG
    if [ ! -e $PWD_DB_FILE ]; then
-       if [ -e "$KEY_FILE" ]; then
-          echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
-          set_password_actual $USER_TO_CHECK
-       else
-          echo "\$KEY_FILE ($KEY_FILE) not found. Cannot continue."
-          exit 1
-       fi
+       echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
+       set_password_actual $USER_TO_CHECK
    ## $PWD_DB_FILE already exist. 
    ## verify value of $validity_pwd_tag
    else

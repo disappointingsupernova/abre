@@ -132,11 +132,9 @@ function set_password_actual
 {
           local USER_TO_CHECK=$1
 
-          echo -n "Password: "
-          read -s PWD_entered
+          read -s -p "Password: " PWD_entered
           echo
-          echo -n "Re-input Password: "
-          read -s PWD_entered2
+          read -s -p "Re-input Password: " PWD_entered2
           echo
           [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered"
           [ $DEBUG_ACTIVE ] && echo "[debug] $PWD_entered2"

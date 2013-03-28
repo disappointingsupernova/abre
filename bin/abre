@@ -27,8 +27,6 @@ function usage
 ## default is to get password
 internal_cmd="GET_PASSWORD_NOW"
 
-## all available option should be described below as
-##   :a:b:c:d
 while getopts "sd:u:k:" opt; do
   case $opt in
     u) 
@@ -75,9 +73,8 @@ else
       if [ $_user_found -eq 1 ]; then
         ## ask user
         echo "User [$USER_GIVEN] already exist."
-        echo "Do you want to change password instead? Yes/no"
-        echo -n ">>> "
-        read ans_chpwd
+        echo "Do you want to change password instead? [Y]es/[n]o"
+        read -p ">>> " ans_chpwd
         ## if yes, delete entry in pwd.db
         if [ "$ans_chpwd" == "Y" ]; then
            $SED_BIN -i /^$USER_GIVEN\ /d $PWD_DB_FILE

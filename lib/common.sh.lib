@@ -139,7 +139,7 @@ function set_password
           echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
           set_password_actual $USER_TO_CHECK
        else
-          echo "TODO: $KEY_FILE not found. Abort"
+          echo "\$KEY_FILE ($KEY_FILE) not found. Cannot continue."
           exit 1
        fi
    ## $PWD_DB_FILE already exist. 

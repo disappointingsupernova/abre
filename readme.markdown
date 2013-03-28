@@ -14,15 +14,14 @@ created my own.
 How to Use 'abre'
 
  1. git clone https://github.com/icasimpan/abre.git abre
- 2. rm abre/etc/pwd.db
- 3. For now, key file used is your ssh rsa private key file in $HOME/.ssh/id_rsa.
+ 2. For now, key file used is your ssh rsa private key file in $HOME/.ssh/id_rsa.
     If you don't have the said file, change to any file the value of $KEY_FILE in 
     lib/common.sh.lib. For instance, if you use /etc/passwd, it would be 
          KEY_FILE='/etc/passwd'
- 4. To set password, use:
+ 3. To set password, use:
       ~$ ~/abre/bin/abre -u <username> -s
  
- 5. To get password, use:
+ 4. To get password, use:
       ~$ ~/abre/bin/abre -u <username>
 
 How to use 'abre' in your scripts
@@ -66,7 +65,7 @@ request
 -------------------------------------------------------
 
 GOALS OF ABRE:
-  * simplicity (only get/set(encrypted) password, perhaps later is list/delete accounts)
+  * simplicity (only get/set(encrypted) password, perhaps later features to consider is list/delete accounts)
   * encrypt password via any identity key (default is your ssh rsa private key)
   * get the cleartext password if identity key allows
 

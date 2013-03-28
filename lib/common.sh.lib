@@ -102,8 +102,9 @@ function get_password
 #########################################################
 function get_KF_SIG
 {
-  ## TODO: ensure that KEY_FILE already exist
-  local cipher_text=$(get_cipher_text $validity_pwd_tag)
+  local  cipher_text=""
+
+  [ -e "$KEY_FILE" ] && cipher_text=$(get_cipher_text $validity_pwd_tag)
   [ "$cipher_text" == "" ] && cipher_text=$bad_pwd_tag
 
   echo $cipher_text  

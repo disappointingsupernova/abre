@@ -1,0 +1,1 @@
+if password db found/authenticated, but user not found, say __USER_NOT_FOUND__

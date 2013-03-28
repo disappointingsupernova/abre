@@ -3,7 +3,7 @@ PWD_DB_FILE='../etc/pwd.db'
 user_not_found='__USER_NOT_FOUND__'
 pwd_db_file_missing='__PWD_DB_FILE_MISSING__'
 validity_pwd_tag='___KF_SIG'
-bad_pwd_tag='ERR_CORRUPT_PWD_FILE'
+bad_pwd_tag='__ERR_UNREADABLE_PWD_FILE__'
 
 ## binaries list
 AWK_BIN=`which awk 2>/dev/null`
@@ -77,17 +77,22 @@ function get_cipher_text
 function get_password
 {
     local USER=$1
+    local retval=$user_not_found
+ 
     [ $DEBUG_ACTIVE ] && echo "debug: get_password() - param: |$USER|"
 
-	#TODO: add __KF_SIG checking for password db integrity
-	
-    ## if account not found, return $user_not_found
-    if [ $(is_user_found $USER) -eq 0 ]; then
-        echo $user_not_found
+    if [ -e "$KEY_FILE" ] && [ "$(get_KF_SIG)" == "$(get_file_md5 "$KEY_FILE")" ]; then
+        ## if account not found, return $user_not_found
+        if [ $(is_user_found $USER) -eq 0 ]; then
+            retval=$user_not_found
+        else
+            retval=$(echo `get_cipher_text $USER`|$BASE64_BIN -d|$OPENSSL_BIN des3 -d -k "$KEY_FILE")
+        fi
     else
-        echo `get_cipher_text $USER`|$BASE64_BIN -d|$OPENSSL_BIN des3 -d -k "$KEY_FILE"
-    fi
-    
+        retval=$bad_pwd_tag
+    fi 
+
+    echo $retval
 }
 ## END: get_password()
 

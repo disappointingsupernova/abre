@@ -35,10 +35,10 @@ How to use 'abre' in your scripts
   
   Take note that of the following output:
 
-    * ERR_CORRUPT_PWD_FILE    --> $KEY_FILE has been changed since creating pwd.db
-                                  or is inaccessible to you 
-    * __USER_NOT_FOUND__      --> invalid/unrecorded usernames
-    * __PWD_DB_FILE_MISSING__ --> when pwd.db is missing
+    * __ERR_UNREADABLE_PWD_FILE__ --> $KEY_FILE has been changed since creating pwd.db
+                                      or is $KEY_FILE inaccessible to you 
+    * __USER_NOT_FOUND__          --> invalid/unrecorded usernames
+    * __PWD_DB_FILE_MISSING__     --> when pwd.db is missing
 
   So take those into consideration in your script
   

@@ -1,6 +1,7 @@
 KEY_FILE="$HOME/.ssh/id_rsa"
 PWD_DB_FILE='../etc/pwd.db'
 user_not_found='__USER_NOT_FOUND__'
+pwd_db_file_missing='__PWD_DB_FILE_MISSING__'
 validity_pwd_tag='___KF_SIG'
 bad_pwd_tag='ERR_CORRUPT_PWD_FILE'
 

@@ -59,9 +59,15 @@ done
 if [ -z $USER_GIVEN ]; then
     usage
 else
+    ## 
+    ## GET_PASSWORD_NOW is the default. But make sure $PWD_DB_FILE exist too
+    ##
     if [ "$internal_cmd" == "GET_PASSWORD_NOW" ] && [ -e $PWD_DB_FILE ]; then
         get_password $USER_GIVEN
-    elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ] || [ ! -e $PWD_DB_FILE ] ; then
+    ##
+    ## SET_PASSWORD_NOW must be explicitly chosen
+    ## 
+    elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
     ### START: SET_PASSWORD
       if [ $(is_user_found $USER_GIVEN) -eq 1 ]; then
         ## ask user
@@ -80,5 +86,11 @@ else
         set_password $USER_GIVEN
       fi
     ### END: SET_PASSWORD
+
+   ##
+   ## shout '__PWD_DB_FILE_MISSING__' 
+   ##
+   else
+      echo "$pwd_db_file_missing"
    fi
 fi

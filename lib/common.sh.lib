@@ -39,10 +39,11 @@ function is_user_found
     local USER=$1
     local retval=0
 
-    [ -e $PWD_DB_FILE ] && user_found=`$AWK_BIN "/$USER/ {print \\$1}" "$PWD_DB_FILE"`
+    [ -e "$PWD_DB_FILE" ] && user_found=`$AWK_BIN "/$USER/ {print \\$1}" "$PWD_DB_FILE"`
     [ "$user_found" == "$USER" ] && retval=1
 
-    echo $retval
+    #echo $retval
+    return $retval
 }
 ## END: is_user_found()
 
@@ -83,7 +84,9 @@ function get_password
 
     if [ -e "$KEY_FILE" ] && [ "$(get_KF_SIG)" == "$(get_file_md5 "$KEY_FILE")" ]; then
         ## if account not found, return $user_not_found
-        if [ $(is_user_found $USER) -eq 0 ]; then
+        is_user_found $USER
+        local found_user=$? 
+        if [ ${found_user} -eq 0 ]; then
             retval=$user_not_found
         else
             retval=$(echo `get_cipher_text $USER`|$BASE64_BIN -d|$OPENSSL_BIN des3 -d -k "$KEY_FILE")

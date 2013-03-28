@@ -120,18 +120,33 @@ function get_KF_SIG
 ## END: get_KF_SIG()
 
 #########################################################
-## FUNCTION : set_password_actual
+## FUNCTION : set_password
 ## PURPOSE  : 
 ## PARAMS   : 
 ## OUTPUT   :
 ##
 ## STATUS: NOT TESTED YET
 #########################################################
-## no-verification. Just set password
-function set_password_actual
+function set_password
 {
-          local USER_TO_CHECK=$1
-
+   local USER_TO_CHECK=$1
+   local __kf_sig_val=$(get_file_md5 "$KEY_FILE")
+   local kf_id=$(get_KF_SIG)
+   
+   ## $PWD_DB_FILE absent. Add __KF_SIG
+   if [ ! -e $PWD_DB_FILE ]; then
+       if [ -e "$KEY_FILE" ]; then
+          echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
+          set_password_actual $USER_TO_CHECK
+       else
+          echo "TODO: $KEY_FILE not found. Abort"
+          exit 1
+       fi
+   ## $PWD_DB_FILE already exist. 
+   ## verify value of $validity_pwd_tag
+   else
+      ## $__kfsig_val is same as $kf_id, User validated.
+      if [ "$__kf_sig_val" == "$kf_id" ]; then
           read -s -p "Password: " PWD_entered
           echo
           read -s -p "Re-input Password: " PWD_entered2
@@ -150,65 +165,17 @@ function set_password_actual
               echo 'ERROR: Passwords does not match!'
               exit 1
           fi
-}
-## END: set_password_actual()
-
-#########################################################
-## FUNCTION : set_password_actual_chksig
-## PURPOSE  : 
-## PARAMS   : 
-## OUTPUT   :
-##
-## STATUS: NOT TESTED YET
-#########################################################
-function set_password_actual_chksig
-{
-      local USER_TO_CHECK=$1
-      local kfsig_val=$(get_KF_SIG)
-
-      ## $KEY_FILE is same as $__KF_SIG. User validated.
-      if [ "$kfsig_val" == $(get_file_md5 "$KEY_FILE") ]; then
-          set_password_actual $USER_TO_CHECK
-      elif [ "$kfsig_val" == "$bad_pwd_tag" ]; then
-          echo "ERROR: Corrupted pwd database."
+      elif [ "$kfid" == "$bad_pwd_tag" ]; then
+          echo "ERROR: Unreadable pwd database."
       else
           echo "ERROR: Unauthorized to save new account to pwd database"
       fi
-}
-## END: set_password_actual_chksig()
-
-#########################################################
-## FUNCTION : set_password
-## PURPOSE  : 
-## PARAMS   : 
-## OUTPUT   :
-##
-## STATUS: NOT TESTED YET
-#########################################################
-function set_password
-{
-   local USER_TO_CHECK=$1
-
-   ## $PWD_DB_FILE absent. Add __KF_SIG
-   if [ ! -e $PWD_DB_FILE ]; then
-       if [ -e "$KEY_FILE" ]; then
-          __kf_sig_val=$(get_file_md5 "$KEY_FILE")
-          echo "$validity_pwd_tag $__kf_sig_val" > $PWD_DB_FILE
-          set_password_actual $USER_TO_CHECK
-       else
-          echo "TODO: $KEY_FILE not found. Abort"
-          exit 1
-       fi
-   ## $PWD_DB_FILE already exist. 
-   ## verify value of $validity_pwd_tag
-   else
-       set_password_actual_chksig $USER_TO_CHECK
    fi
 }
 ## END: set_password()
 
-#########################################################
-## FUNCTION : get_file_md5
+##########################################################
+### FUNCTION : get_file_md5
 ## PURPOSE  : 
 ## PARAMS   : 
 ## OUTPUT   :

@@ -20,7 +20,7 @@ function usage
      echo "   u - used to identify the <user_given> to use"
      echo "   d - optional. Defaults to abre/etc/pwd.db. To override, specify </path/to/pwd.db>"
      echo "   k - optional. Defaults to ~/.ssh/id_rsa. To override, specify </path/to/key_file_to_use>"
-     echo "   s - Set password of <user_given>"
+     echo "   s - Set password of <user_given>. If not specified, gets password"
      exit 1
 }
 

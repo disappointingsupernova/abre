@@ -65,7 +65,7 @@ request
 -------------------------------------------------------
 
 GOALS OF ABRE:
-  * simplicity (only get/set(encrypted) password, perhaps later features to consider is list/delete accounts)
+  * simplicity (only get/set(encrypted) password, delete account)
   * encrypt password via any identity key (default is your ssh rsa private key)
   * get the cleartext password if identity key allows
 
@@ -78,8 +78,3 @@ directory structure:
  lib - libraries (e.g.) common.sh.lib
  etc - password and config files would be here
  tests - tests on functions would be here
-
-*TODO (see also the issues section in github)*
-  * duplicate user: delete only after new password ready to be written
-  * db validation first before checking for duplicate user
-  * refactor set_password()

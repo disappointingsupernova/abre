@@ -240,7 +240,24 @@ function set_password
    fi
 }
 ## END: set_password()
+function remove_account
+{
+    local USER_GIVEN=$1
 
+    ## check MD5 to make sure you are allowed to remove.
+    if [ "$(get_KF_SIG)" == "$(get_file_md5 "$KEY_FILE")" ]; then
+        ## if account not found, return $user_not_found
+        is_user_found $USER_GIVEN
+        local found_user=$?
+        if [ ${found_user} -eq 0 ]; then
+            echo "account ($USER_GIVEN) not found."
+        else
+	    $SED_BIN -i /^$USER_GIVEN\ /d $PWD_DB_FILE
+            echo "account ($USER_GIVEN) removed."
+        fi
+    fi
+}
+## END: remove_account()
 ##########################################################
 ### FUNCTION : get_file_md5
 ## PURPOSE  : 

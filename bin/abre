@@ -20,7 +20,7 @@ check_KF_exist     ## existence of $KEY_FILE
 ## default is to get password
 internal_cmd="GET_PASSWORD_NOW"
 
-while getopts "sd:u:k:" opt; do
+while getopts "rsd:u:k:" opt; do
   case $opt in
     u) 
       USER_GIVEN=$OPTARG
@@ -33,6 +33,9 @@ while getopts "sd:u:k:" opt; do
       ;;
     s) ## set_password. No parameter needed
      internal_cmd="SET_PASSWORD_NOW"
+     ;;
+    r) ## remove_account. No parameter needed
+     internal_cmd="REMOVE_ACCOUNT_NOW"
      ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -49,16 +52,21 @@ done
 if [ -z $USER_GIVEN ]; then
     usage
 else
-    ## 
-    ## GET_PASSWORD_NOW is the default. But make sure $PWD_DB_FILE exist too
-    ##
-    if [ "$internal_cmd" == "GET_PASSWORD_NOW" ] && [ -e $PWD_DB_FILE ]; then
-        get_password $USER_GIVEN
-    ##
-    ## SET_PASSWORD_NOW must be explicitly chosen
-    ## 
-    elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
+   ## 
+   ## GET_PASSWORD_NOW is the default. But make sure $PWD_DB_FILE exist too
+   ##
+   if [ "$internal_cmd" == "GET_PASSWORD_NOW" ] && [ -e $PWD_DB_FILE ]; then
+       get_password $USER_GIVEN
+   ##
+   ## SET_PASSWORD_NOW must be explicitly chosen
+   ## 
+   elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
 	    set_password $USER_GIVEN
+   ##
+   ## REMOVE_ACCOUNT_NOW 
+   ## 
+   elif [ "$internal_cmd" == "REMOVE_ACCOUNT_NOW" ]; then
+	    remove_account $USER_GIVEN
    ##
    ## shout '__PWD_DB_FILE_MISSING__' 
    ##

@@ -9,6 +9,7 @@ bad_pwd_tag='__ERR_UNREADABLE_PWD_FILE__'
 AWK_BIN=`which awk 2>/dev/null`
 BASE64_BIN=`which base64 2>/dev/null`
 CUT_BIN=`which cut 2>/dev/null`
+GREP_BIN=`which grep 2>/dev/null`
 MD5SUM_BIN=`which md5sum 2>/dev/null`
 OPENSSL_BIN=`which openssl 2>/dev/null`
 SED_BIN=`which sed 2>/dev/null`
@@ -241,6 +242,15 @@ function set_password
    fi
 }
 ## END: set_password()
+
+##########################################################
+## FUNCTION : remove_account
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
 function remove_account
 {
     local USER_GIVEN=$1
@@ -259,8 +269,26 @@ function remove_account
     fi
 }
 ## END: remove_account()
+
 ##########################################################
-### FUNCTION : get_file_md5
+## FUNCTION : list_accounts
+## PURPOSE  : 
+## PARAMS   : 
+## OUTPUT   :
+##
+## STATUS: NOT TESTED YET
+#########################################################
+function list_accounts
+{
+    ## check MD5 to make sure you are allowed to remove.
+    if [ "$(get_KF_SIG)" == "$(get_file_md5 "$KEY_FILE")" ]; then
+        $GREP_BIN -v $validity_pwd_tag $PWD_DB_FILE|$AWK_BIN '{print $1}'
+    fi
+}
+## END: list_accounts()
+
+##########################################################
+## FUNCTION : get_file_md5
 ## PURPOSE  : 
 ## PARAMS   : 
 ## OUTPUT   :

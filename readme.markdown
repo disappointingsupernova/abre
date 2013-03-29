@@ -65,7 +65,7 @@ request
 -------------------------------------------------------
 
 GOALS OF ABRE:
-  * simplicity (only get/set(encrypted) password, delete account)
+  * simplicity (only get/set(encrypted) password, delete account, list accounts)
   * encrypt password via any identity key (default is your ssh rsa private key)
   * get the cleartext password if identity key allows
 

@@ -20,7 +20,7 @@ check_KF_exist     ## existence of $KEY_FILE
 ## default is to get password
 internal_cmd="GET_PASSWORD_NOW"
 
-while getopts "rsd:u:k:" opt; do
+while getopts "lrsd:u:k:" opt; do
   case $opt in
     u) 
       USER_GIVEN=$OPTARG
@@ -37,6 +37,9 @@ while getopts "rsd:u:k:" opt; do
     r) ## remove_account. No parameter needed
      internal_cmd="REMOVE_ACCOUNT_NOW"
      ;;
+    l) ## list_accounts. No parameter needed
+     internal_cmd="LIST_ACCOUNTS_NOW"
+     ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
       break
@@ -49,7 +52,7 @@ while getopts "rsd:u:k:" opt; do
 done
 
 #### CODE STARTS EXECUTING HERE...after it parsed parameters above...
-if [ -z $USER_GIVEN ]; then
+if [ -z $USER_GIVEN ] && [ "$internal_cmd" != "LIST_ACCOUNTS_NOW" ]; then
     usage
 else
    ## 
@@ -62,6 +65,11 @@ else
    ## 
    elif [ "$internal_cmd" == "SET_PASSWORD_NOW" ]; then
 	    set_password $USER_GIVEN
+   ##
+   ## LIST_ACCOUNTS_NOW 
+   ## 
+   elif [ "$internal_cmd" == "LIST_ACCOUNTS_NOW" ]; then
+	    list_accounts
    ##
    ## REMOVE_ACCOUNT_NOW 
    ## 
